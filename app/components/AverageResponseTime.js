@@ -31,5 +31,5 @@ export default function AverageResponseTime() {
     return <div>{error}</div>;
   }
 
-  return <div>Average Response Time: {avgTime} hours</div>;
+  return <div>Current Average Ticket Duration Time (open to close): {avgTime} hours</div>;
 }

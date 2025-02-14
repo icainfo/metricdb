@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+
+// Register the necessary components for Chart.js
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function TicketsByReportMethod() {
   const [chartData, setChartData] = useState(null);

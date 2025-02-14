@@ -80,7 +80,7 @@ const AverageResponseTime = () => {
 
   return (
     <div className="response-time">
-      <h2>Average Response Time</h2>
+      <h2>Average Ticket Duration Time </h2>
       <p>{avgTime ? `${avgTime} hours` : "Loading..."}</p>
     </div>
   );

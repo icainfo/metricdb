@@ -16,10 +16,19 @@ import {
 // Register Chart.js components once
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// Utility function to fetch chart data.
+// Define Maryland colors
+const MARYLAND_RED = "#e21833";
+const MARYLAND_GOLD = "#ffd200";
+const WHITE = "#ffffff";
+const BLACK = "#000000";
+
+// Utility function to fetch chart data with API key header
 const fetchChartData = async (url, dataKey) => {
   try {
-    const res = await fetch(url);
+    // Include the API key in the request header
+    const res = await fetch(url, {
+      headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
+    });
     if (!res.ok) throw new Error("Failed to fetch data");
     const data = await res.json();
     return {
@@ -28,9 +37,10 @@ const fetchChartData = async (url, dataKey) => {
         {
           label: dataKey.replace(/_/g, " ").toUpperCase(),
           data: Object.values(data[dataKey]),
-          backgroundColor: [
-            "#E03A3E", "#B22222", "#8B0000", "#CD5C5C", "#FF6347", "#000000", "#333333",
-          ],
+          // Cycle through Maryland colors for chart elements
+          backgroundColor: [MARYLAND_RED, MARYLAND_GOLD, BLACK, MARYLAND_RED, MARYLAND_GOLD],
+          borderColor: BLACK,
+          borderWidth: 1,
         },
       ],
     };
@@ -53,9 +63,9 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
       <h2 className="chart-title">{title}</h2>
       {chartData ? (
         type === "bar" ? (
-          <Bar data={chartData} options={{ responsive: true }} />
+          <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
         ) : (
-          <Pie data={chartData} options={{ responsive: true }} />
+          <Pie data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
         )
       ) : (
         <p>Loading...</p>
@@ -71,7 +81,9 @@ const AverageResponseTime = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("https://metricapi-f7n6.onrender.com/metrics/average-ticket-duration");
+        const res = await fetch("https://metricapi-f7n6.onrender.com/metrics/average-ticket-duration", {
+          headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
+        });
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setAvgTime((data.average_ticket_duration / 3600).toFixed(2)); // Convert seconds to hours
@@ -94,7 +106,11 @@ const AverageResponseTime = () => {
 export default function TicketMetricsDashboard() {
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">ICA IT Metric Dashboard</h1>
+      <header className="dashboard-header">
+        {/* Logo Area – replace src with your logo image URL */}
+        <img className="logo" src="/logo.png" alt="Company Logo" />
+        <h1 className="dashboard-title">ICA IT Metric Dashboard</h1>
+      </header>
 
       {/* Full-width average response time */}
       <div className="full-width">
@@ -141,17 +157,27 @@ export default function TicketMetricsDashboard() {
           padding: 20px;
           max-width: 1200px;
           margin: 0 auto;
-          text-align: center;
-          background-color: #ffffff;
+          background-color: ${WHITE};
+          color: ${BLACK};
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
         }
-        
+        .dashboard-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 30px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid ${MARYLAND_RED};
+        }
+        .logo {
+          height: 60px;
+          margin-right: 20px;
+        }
         .dashboard-title {
           font-size: 2.5rem;
-          margin-bottom: 20px;
-          color: #E03A3E;
+          color: ${MARYLAND_RED};
           font-weight: bold;
+          margin: 0;
         }
-        
         .response-time {
           background: #f8f9fa;
           padding: 15px;
@@ -160,32 +186,28 @@ export default function TicketMetricsDashboard() {
           font-size: 1.2rem;
           margin-bottom: 20px;
         }
-
         .charts-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
           gap: 20px;
           margin-top: 20px;
         }
-
         .chart-container {
-          background: #ffffff;
+          background: ${WHITE};
           padding: 15px;
           border-radius: 10px;
           box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease-in-out;
+          height: 350px;
         }
-
         .chart-container:hover {
           transform: translateY(-5px);
         }
-
         .chart-title {
           font-size: 1.5rem;
           margin-bottom: 10px;
-          color: #333;
+          color: ${BLACK};
         }
-
         .full-width {
           margin-bottom: 20px;
         }

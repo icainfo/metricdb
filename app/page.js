@@ -108,7 +108,7 @@ export default function TicketMetricsDashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         {/* Logo Area – replace src with your logo image URL */}
-        <img className="logo" src="/logo.png" alt="Company Logo" />
+        <img className="logo" src="logo.png" alt="Company Logo" />
         <h1 className="dashboard-title">ICA IT Metric Dashboard</h1>
       </header>
 

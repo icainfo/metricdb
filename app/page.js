@@ -23,7 +23,7 @@ const MARYLAND_GOLD = "#ffd200";
 const WHITE = "#ffffff";
 const BLACK = "#000000";
 
-// Common chart options for readability
+// Chart options with fixed settings for readability
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -31,7 +31,6 @@ const chartOptions = {
     legend: {
       labels: { color: BLACK, font: { size: 12 } },
     },
-    title: { display: false },
   },
   scales: {
     x: {
@@ -71,9 +70,10 @@ const fetchChartData = async (url, dataKey) => {
   }
 };
 
-// Reusable Chart Component
+// Reusable Chart Component.
 const ChartComponent = ({ title, url, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);
+
   useEffect(() => {
     fetchChartData(url, dataKey).then(setChartData);
   }, [url, dataKey]);
@@ -83,9 +83,9 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
       <h2 className="chart-title">{title}</h2>
       {chartData ? (
         type === "bar" ? (
-          <Bar data={chartData} options={chartOptions} />
+          <Bar data={chartData} options={chartOptions} height={300} />
         ) : (
-          <Pie data={chartData} options={chartOptions} />
+          <Pie data={chartData} options={chartOptions} height={300} />
         )
       ) : (
         <p>Loading...</p>
@@ -94,9 +94,10 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
   );
 };
 
-// Average Ticket Duration Component
+// Average Ticket Duration Component.
 const AverageResponseTime = () => {
   const [avgTime, setAvgTime] = useState(null);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -105,13 +106,14 @@ const AverageResponseTime = () => {
         });
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
-        setAvgTime((data.average_ticket_duration / 3600).toFixed(2)); // seconds to hours
+        setAvgTime((data.average_ticket_duration / 3600).toFixed(2)); // Convert seconds to hours
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
     fetchData();
   }, []);
+
   return (
     <div className="response-time">
       <h2>Average Ticket Duration</h2>
@@ -162,7 +164,10 @@ const LandingPage = ({ onAuthenticated }) => {
         .landing-container::after {
           content: '';
           position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           background: rgba(0, 0, 0, 0.6);
           z-index: 1;
         }
@@ -171,8 +176,8 @@ const LandingPage = ({ onAuthenticated }) => {
           z-index: 2;
           text-align: center;
           color: ${WHITE};
-          padding: 20px;
-          background: rgba(0, 0, 0, 0.4);
+          padding: 20px 30px;
+          background: rgba(0, 0, 0, 0.5);
           border-radius: 10px;
         }
         input {
@@ -181,7 +186,7 @@ const LandingPage = ({ onAuthenticated }) => {
           border-radius: 5px;
           border: none;
           margin-right: 10px;
-          width: 200px;
+          width: 220px;
         }
         button {
           padding: 10px 20px;
@@ -248,7 +253,7 @@ const Dashboard = () => {
         .dashboard-wrapper {
           max-width: 1200px;
           margin: 40px auto;
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.97);
           border-radius: 10px;
           padding: 20px;
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -292,7 +297,7 @@ const Dashboard = () => {
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease-in-out;
           height: 350px;
-          overflow: auto;
+          overflow: hidden;
         }
         .chart-container:hover {
           transform: translateY(-5px);
@@ -311,7 +316,7 @@ const Dashboard = () => {
   );
 };
 
-// Main Component: Shows Landing Page until authenticated, then shows Dashboard
+// Main Component: Show Landing Page until authenticated, then show Dashboard
 export default function TicketMetricsDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   return authenticated ? <Dashboard /> : <LandingPage onAuthenticated={() => setAuthenticated(true)} />;

@@ -23,7 +23,7 @@ const MARYLAND_GOLD = "#ffd200";
 const WHITE = "#ffffff";
 const BLACK = "#000000";
 
-// Chart options with fixed settings for readability
+// Chart options for better readability and fixed scale
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -83,12 +83,12 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
       <h2 className="chart-title">{title}</h2>
       {chartData ? (
         type === "bar" ? (
-          <Bar data={chartData} options={chartOptions} height={300} />
+          <Bar data={chartData} options={chartOptions} />
         ) : (
-          <Pie data={chartData} options={chartOptions} height={300} />
+          <Pie data={chartData} options={chartOptions} />
         )
       ) : (
-        <p>Loading...</p>
+        <p className="loading-text">Loading...</p>
       )}
     </div>
   );
@@ -97,7 +97,6 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
 // Average Ticket Duration Component.
 const AverageResponseTime = () => {
   const [avgTime, setAvgTime] = useState(null);
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -113,11 +112,10 @@ const AverageResponseTime = () => {
     }
     fetchData();
   }, []);
-
   return (
     <div className="response-time">
-      <h2>Average Ticket Duration</h2>
-      <p>{avgTime ? `${avgTime} hours` : "Loading..."}</p>
+      <h2 className="response-title">Average Ticket Duration</h2>
+      <p className="response-value">{avgTime ? `${avgTime} hours` : "Loading..."}</p>
     </div>
   );
 };
@@ -137,7 +135,7 @@ const LandingPage = ({ onAuthenticated }) => {
   return (
     <div className="landing-container">
       <div className="landing-content">
-        <h1>Welcome to the ICA IT Metric Dashboard</h1>
+        <h1 className="landing-title">Welcome to the ICA IT Metric Dashboard</h1>
         <form onSubmit={handleSubmit}>
           <input
             type="password"
@@ -176,9 +174,14 @@ const LandingPage = ({ onAuthenticated }) => {
           z-index: 2;
           text-align: center;
           color: ${WHITE};
-          padding: 20px 30px;
-          background: rgba(0, 0, 0, 0.5);
+          padding: 30px 40px;
+          background: rgba(0, 0, 0, 0.65);
           border-radius: 10px;
+        }
+        .landing-title {
+          margin-bottom: 20px;
+          font-size: 2rem;
+          color: ${MARYLAND_GOLD};
         }
         input {
           padding: 10px;
@@ -186,7 +189,7 @@ const LandingPage = ({ onAuthenticated }) => {
           border-radius: 5px;
           border: none;
           margin-right: 10px;
-          width: 220px;
+          width: 240px;
         }
         button {
           padding: 10px 20px;
@@ -253,10 +256,10 @@ const Dashboard = () => {
         .dashboard-wrapper {
           max-width: 1200px;
           margin: 40px auto;
-          background: rgba(255, 255, 255, 0.97);
+          background: ${WHITE};
           border-radius: 10px;
           padding: 20px;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
         .dashboard-header {
           display: flex;
@@ -276,13 +279,22 @@ const Dashboard = () => {
           margin: 0;
         }
         .response-time {
-          background: #f8f9fa;
+          background: ${WHITE};
           padding: 15px;
           border-radius: 10px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           font-size: 1.2rem;
           margin-bottom: 20px;
           text-align: center;
+          color: ${BLACK};
+        }
+        .response-title {
+          color: ${MARYLAND_RED};
+          margin-bottom: 10px;
+          font-size: 1.5rem;
+        }
+        .response-value {
+          color: ${BLACK};
         }
         .charts-grid {
           display: grid;
@@ -296,7 +308,7 @@ const Dashboard = () => {
           border-radius: 10px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease-in-out;
-          height: 350px;
+          max-height: 350px;
           overflow: hidden;
         }
         .chart-container:hover {
@@ -305,11 +317,16 @@ const Dashboard = () => {
         .chart-title {
           font-size: 1.5rem;
           margin-bottom: 10px;
-          color: ${BLACK};
+          color: ${MARYLAND_RED};
           text-align: center;
         }
         .full-width {
           margin-bottom: 20px;
+        }
+        .loading-text {
+          text-align: center;
+          color: ${BLACK};
+          font-size: 1rem;
         }
       `}</style>
     </div>

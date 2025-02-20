@@ -15,15 +15,20 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// Define Maryland colors with better contrast
+// Maryland color palette
 const MARYLAND_RED = "#e21833";
 const MARYLAND_GOLD = "#ffd200";
 const WHITE = "#ffffff";
 const BLACK = "#000000";
-const BACKGROUND_LIGHT = "#f8f9fa";
-const TEXT_DARK = "#2d3748";
+const MARYLAND_COLORS = [
+  MARYLAND_RED,
+  MARYLAND_GOLD,
+  "#ab0d1f", // darker red
+  "#d4af37", // darker gold
+  "#8b0000", // deep red
+];
 
-// Improved chart options with better responsiveness and dark mode support
+// Enhanced chart options
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: true,
@@ -33,7 +38,7 @@ const chartOptions = {
       position: 'bottom',
       labels: {
         padding: 20,
-        color: TEXT_DARK,
+        color: BLACK,
         font: { size: 12, weight: '500' },
         usePointStyle: true,
       },
@@ -43,13 +48,12 @@ const chartOptions = {
       padding: 12,
       titleFont: { size: 14, weight: '600' },
       bodyFont: { size: 13 },
-      displayColors: true,
     },
   },
   scales: {
     x: {
       ticks: { 
-        color: TEXT_DARK,
+        color: BLACK,
         font: { size: 11 },
         maxRotation: 45,
         minRotation: 45,
@@ -59,7 +63,7 @@ const chartOptions = {
     y: {
       beginAtZero: true,
       ticks: { 
-        color: TEXT_DARK,
+        color: BLACK,
         font: { size: 11 },
       },
       grid: { color: 'rgba(0,0,0,0.05)' },
@@ -67,7 +71,6 @@ const chartOptions = {
   },
 };
 
-// Enhanced fetch utility with error handling and loading states
 const fetchChartData = async (url, dataKey) => {
   try {
     const res = await fetch(url, {
@@ -82,7 +85,7 @@ const fetchChartData = async (url, dataKey) => {
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' '),
         data: Object.values(data[dataKey]),
-        backgroundColor: [MARYLAND_RED, MARYLAND_GOLD, '#4a5568', '#718096', '#a0aec0'],
+        backgroundColor: MARYLAND_COLORS,
         borderColor: WHITE,
         borderWidth: 1,
       }],
@@ -93,7 +96,6 @@ const fetchChartData = async (url, dataKey) => {
   }
 };
 
-// Improved Chart Component with loading state and error handling
 const ChartComponent = ({ title, url, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,7 +139,6 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
   );
 };
 
-// Enhanced Average Response Time Component
 const AverageResponseTime = () => {
   const [avgTime, setAvgTime] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -174,7 +175,7 @@ const AverageResponseTime = () => {
   );
 };
 
-// Improved Landing Page Component
+// Restored original landing page with slight enhancements
 const LandingPage = ({ onAuthenticated }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -189,9 +190,9 @@ const LandingPage = ({ onAuthenticated }) => {
   };
 
   return (
-    <div className="landing-page">
-      <div className="auth-container">
-        <h1>ICA IT Metric Dashboard</h1>
+    <div className="landing-container">
+      <div className="landing-content">
+        <h1 className="landing-title">Welcome to the ICA IT Metric Dashboard</h1>
         <form onSubmit={handleSubmit}>
           <input
             type="password"
@@ -202,69 +203,126 @@ const LandingPage = ({ onAuthenticated }) => {
               setError("");
             }}
           />
-          <button type="submit">Enter Dashboard</button>
+          <button type="submit">Enter</button>
         </form>
-        {error && <p className="error-message">{error}</p>}
+        {error && <p className="error">{error}</p>}
       </div>
       <style jsx>{`
-        .landing-page {
-          min-height: 100vh;
-          background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                      url('/background-stadium.jpg') no-repeat center center/cover;
+        .landing-container {
           display: flex;
-          align-items: center;
           justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: url('/background-stadium.jpg') no-repeat center center/cover;
+          position: relative;
         }
-        .auth-container {
-          background: rgba(255, 255, 255, 0.95);
-          padding: 2.5rem;
-          border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          width: 100%;
-          max-width: 400px;
+        .landing-container::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 1;
+        }
+        .landing-content {
+          position: relative;
+          z-index: 2;
           text-align: center;
+          color: ${WHITE};
+          padding: 30px 40px;
+          background: rgba(0, 0, 0, 0.65);
+          border-radius: 10px;
         }
-        h1 {
-          color: ${MARYLAND_RED};
-          font-size: 1.8rem;
-          margin-bottom: 1.5rem;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
+        .landing-title {
+          margin-bottom: 20px;
+          font-size: 2rem;
+          color: ${MARYLAND_GOLD};
         }
         input {
-          padding: 0.75rem;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
+          padding: 10px;
           font-size: 1rem;
-          width: 100%;
+          border-radius: 5px;
+          border: none;
+          margin-right: 10px;
+          width: 240px;
         }
         button {
-          background: ${MARYLAND_RED};
-          color: white;
-          padding: 0.75rem;
-          border: none;
-          border-radius: 6px;
+          padding: 10px 20px;
           font-size: 1rem;
+          background-color: ${MARYLAND_RED};
+          color: ${WHITE};
+          border: none;
+          border-radius: 5px;
           cursor: pointer;
           transition: background-color 0.2s;
         }
         button:hover {
-          background: #c41528;
+          background-color: #c41528;
         }
-        .error-message {
-          color: ${MARYLAND_RED};
-          margin-top: 0.75rem;
+        .error {
+          color: ${MARYLAND_GOLD};
+          margin-top: 10px;
         }
       `}</style>
     </div>
   );
 };
 
-// Enhanced Dashboard Component
+// Enhanced Dashboard with tab navigation
 const Dashboard = () => {
+  const [activeChart, setActiveChart] = useState('overview');
+  
+  const charts = {
+    overview: { title: "Overview" },
+    category: {
+      title: "Tickets by Category",
+      component: <ChartComponent
+        title="Tickets by Category"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-category"
+        dataKey="tickets_by_category"
+        type="bar"
+      />
+    },
+    reportMethod: {
+      title: "Report Methods",
+      component: <ChartComponent
+        title="Tickets by Report Method"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-report-method"
+        dataKey="tickets_by_report_method"
+        type="pie"
+      />
+    },
+    serviceType: {
+      title: "Service Types",
+      component: <ChartComponent
+        title="Tickets by Service Type"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-service-type"
+        dataKey="tickets_by_service_type"
+        type="bar"
+      />
+    },
+    location: {
+      title: "Locations",
+      component: <ChartComponent
+        title="Tickets by Location"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-location"
+        dataKey="tickets_by_location"
+        type="pie"
+      />
+    },
+    department: {
+      title: "Departments",
+      component: <ChartComponent
+        title="Tickets by Department"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-department"
+        dataKey="tickets_by_department"
+        type="bar"
+      />
+    }
+  };
+
   return (
     <div className="dashboard">
       <header>
@@ -275,51 +333,49 @@ const Dashboard = () => {
       </header>
       
       <main>
-        <AverageResponseTime />
-        
-        <div className="charts-grid">
-          <ChartComponent
-            title="Tickets by Category"
-            url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-category"
-            dataKey="tickets_by_category"
-            type="bar"
-          />
-          <ChartComponent
-            title="Tickets by Report Method"
-            url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-report-method"
-            dataKey="tickets_by_report_method"
-            type="pie"
-          />
-          <ChartComponent
-            title="Tickets by Service Type"
-            url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-service-type"
-            dataKey="tickets_by_service_type"
-            type="bar"
-          />
-          <ChartComponent
-            title="Tickets by Location"
-            url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-location"
-            dataKey="tickets_by_location"
-            type="pie"
-          />
-          <ChartComponent
-            title="Tickets by Department"
-            url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-department"
-            dataKey="tickets_by_department"
-            type="bar"
-          />
+        <div className="metric-section">
+          <AverageResponseTime />
+        </div>
+
+        <div className="navigation-tabs">
+          {Object.entries(charts).map(([key, { title }]) => (
+            <button
+              key={key}
+              className={`tab-button ${activeChart === key ? 'active' : ''}`}
+              onClick={() => setActiveChart(key)}
+            >
+              {title}
+            </button>
+          ))}
+        </div>
+
+        <div className="chart-container">
+          {activeChart === 'overview' ? (
+            <div className="charts-grid">
+              {Object.entries(charts).slice(1).map(([key, { component }]) => (
+                <div key={key} className="overview-chart">
+                  {component}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="single-chart">
+              {charts[activeChart].component}
+            </div>
+          )}
         </div>
       </main>
 
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: ${BACKGROUND_LIGHT};
-          color: ${TEXT_DARK};
+          background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+                      url('/background-stadium.jpg') no-repeat center center/cover;
+          background-attachment: fixed;
         }
         
         header {
-          background: white;
+          background: rgba(255, 255, 255, 0.95);
           padding: 1rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           position: sticky;
@@ -333,6 +389,7 @@ const Dashboard = () => {
           display: flex;
           align-items: center;
           gap: 1rem;
+          padding: 0 1rem;
         }
         
         .logo {
@@ -352,42 +409,85 @@ const Dashboard = () => {
           padding: 0 1rem;
         }
         
-        .metric-card {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 12px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .metric-section {
           margin-bottom: 2rem;
+        }
+        
+        .metric-card {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
           text-align: center;
         }
         
         .metric-card h2 {
-          color: ${TEXT_DARK};
+          color: ${MARYLAND_RED};
           font-size: 1.4rem;
           margin-bottom: 1rem;
         }
         
         .metric-value {
-          font-size: 2rem;
-          color: ${MARYLAND_RED};
+          font-size: 2.5rem;
+          color: ${BLACK};
           font-weight: 600;
+        }
+        
+        .navigation-tabs {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+          flex-wrap: wrap;
+        }
+        
+        .tab-button {
+          padding: 0.75rem 1.5rem;
+          background: white;
+          border: 2px solid ${MARYLAND_RED};
+          color: ${MARYLAND_RED};
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 500;
+        }
+        
+        .tab-button:hover {
+          background: ${MARYLAND_RED};
+          color: white;
+        }
+        
+        .tab-button.active {
+          background: ${MARYLAND_RED};
+          color: white;
+        }
+        
+        .chart-container {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 2rem;
+          border-radius: 12px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .charts-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
-          gap: 1.5rem;
+          gap: 2rem;
+        }
+        
+        .single-chart {
+          max-width: 800px;
+          margin: 0 auto;
         }
         
         .chart-card {
           background: white;
           padding: 1.5rem;
-          border-radius: 12px;
+          border-radius: 8px;
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
         .chart-title {
-          color: ${TEXT_DARK};
+          color: ${MARYLAND_RED};
           font-size: 1.2rem;
           margin-bottom: 1rem;
           text-align: center;
@@ -404,7 +504,7 @@ const Dashboard = () => {
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: ${TEXT_DARK};
+          color: ${BLACK};
         }
         
         .error-message {
@@ -419,8 +519,13 @@ const Dashboard = () => {
             text-align: center;
           }
           
-          .charts-grid {
-            grid-template-columns: 1fr;
+          .navigation-tabs {
+            justify-content: center;
+          }
+          
+          .tab-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
           }
           
           .chart-wrapper {

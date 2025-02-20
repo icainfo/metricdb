@@ -13,7 +13,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -378,14 +377,14 @@ const Dashboard = () => {
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.98)),
+          background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
                       url('/background-stadium.jpg') no-repeat center center/cover;
           background-attachment: fixed;
           color: ${BLACK};
         }
         
         header {
-          background: rgba(255, 255, 255, 0.98);
+          background: rgba(255, 255, 255, 0.9);
           padding: 1rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           position: sticky;
@@ -426,7 +425,7 @@ const Dashboard = () => {
         }
         
         .metric-card {
-          background: rgba(255, 255, 255, 0.98);
+          background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -475,7 +474,7 @@ const Dashboard = () => {
         }
         
         .chart-container {
-          background: rgba(255, 255, 255, 0.98);
+          background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -550,7 +549,7 @@ const Dashboard = () => {
 
         @media (prefers-color-scheme: dark) {
           .dashboard {
-            background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.98)),
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
                         url('/background-stadium.jpg') no-repeat center center/cover;
           }
           

@@ -15,13 +15,11 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// Updated color constants with better contrast
+// Maryland color palette
 const MARYLAND_RED = "#e21833";
 const MARYLAND_GOLD = "#ffd200";
 const WHITE = "#ffffff";
 const BLACK = "#000000";
-const BACKGROUND_OVERLAY = "rgba(255, 255, 255, 0.97)"; // Increased opacity
-const TEXT_COLOR = "#000000"; // Enforced black text
 const MARYLAND_COLORS = [
   MARYLAND_RED,
   MARYLAND_GOLD,
@@ -30,7 +28,7 @@ const MARYLAND_COLORS = [
   "#8b0000", // deep red
 ];
 
-// Update chart options with forced colors
+// Enhanced chart options
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: true,
@@ -39,25 +37,24 @@ const chartOptions = {
     legend: {
       position: 'bottom',
       labels: {
-        color: TEXT_COLOR, // Forced black text
-        font: { size: 12, weight: '600' }, // Increased weight
+        padding: 20,
+        color: BLACK,
+        font: { size: 12, weight: '500' },
         usePointStyle: true,
       },
     },
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.9)', // Darker background
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
       padding: 12,
       titleFont: { size: 14, weight: '600' },
       bodyFont: { size: 13 },
-      titleColor: WHITE,
-      bodyColor: WHITE,
     },
   },
   scales: {
     x: {
       ticks: { 
-        color: TEXT_COLOR, // Forced black text
-        font: { size: 11, weight: '500' }, // Increased weight
+        color: BLACK,
+        font: { size: 11 },
         maxRotation: 45,
         minRotation: 45,
       },
@@ -66,21 +63,265 @@ const chartOptions = {
     y: {
       beginAtZero: true,
       ticks: { 
-        color: TEXT_COLOR, // Forced black text
-        font: { size: 11, weight: '500' }, // Increased weight
+        color: BLACK,
+        font: { size: 11 },
       },
-      grid: { color: 'rgba(0,0,0,0.1)' },
+      grid: { color: 'rgba(0,0,0,0.05)' },
     },
   },
 };
 
-// [Previous fetchChartData and ChartComponent remain the same...]
+const fetchChartData = async (url, dataKey) => {
+  try {
+    const res = await fetch(url, {
+      headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
+    });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    return {
+      labels: Object.keys(data[dataKey]),
+      datasets: [{
+        label: dataKey.split('_').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' '),
+        data: Object.values(data[dataKey]),
+        backgroundColor: MARYLAND_COLORS,
+        borderColor: WHITE,
+        borderWidth: 1,
+      }],
+    };
+  } catch (error) {
+    console.error(`Error fetching ${dataKey}:`, error);
+    return null;
+  }
+};
 
-// Updated Dashboard component with forced colors and better contrast
+const ChartComponent = ({ title, url, dataKey, type }) => {
+  const [chartData, setChartData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchChartData(url, dataKey);
+        setChartData(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load chart data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [url, dataKey]);
+
+  return (
+    <div className="chart-card">
+      <h2 className="chart-title">{title}</h2>
+      <div className="chart-content">
+        {isLoading ? (
+          <div className="loading-spinner">Loading...</div>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : (
+          <div className="chart-wrapper">
+            {type === "bar" ? (
+              <Bar data={chartData} options={chartOptions} />
+            ) : (
+              <Pie data={chartData} options={{...chartOptions, aspectRatio: 1}} />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AverageResponseTime = () => {
+  const [avgTime, setAvgTime] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("https://metricapi-f7n6.onrender.com/metrics/average-ticket-duration", {
+          headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
+        });
+        if (!res.ok) throw new Error("Failed to fetch data");
+        const data = await res.json();
+        setAvgTime((data.average_ticket_duration / 3600).toFixed(2));
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  return (
+    <div className="metric-card">
+      <h2>Average Ticket Duration</h2>
+      <div className="metric-value">
+        {isLoading ? (
+          <div className="loading-spinner">Loading...</div>
+        ) : (
+          <span>{avgTime} hours</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Restored original landing page with slight enhancements
+const LandingPage = ({ onAuthenticated }) => {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (password === "ITServic3!") {
+      onAuthenticated();
+    } else {
+      setError("Incorrect password");
+    }
+  };
+
+  return (
+    <div className="landing-container">
+      <div className="landing-content">
+        <h1 className="landing-title">Welcome to the ICA IT Metric Dashboard</h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
+          />
+          <button type="submit">Enter</button>
+        </form>
+        {error && <p className="error">{error}</p>}
+      </div>
+      <style jsx>{`
+        .landing-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: url('/background-stadium.jpg') no-repeat center center/cover;
+          position: relative;
+        }
+        .landing-container::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 1;
+        }
+        .landing-content {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+          color: ${WHITE};
+          padding: 30px 40px;
+          background: rgba(0, 0, 0, 0.65);
+          border-radius: 10px;
+        }
+        .landing-title {
+          margin-bottom: 20px;
+          font-size: 2rem;
+          color: ${MARYLAND_GOLD};
+        }
+        input {
+          padding: 10px;
+          font-size: 1rem;
+          border-radius: 5px;
+          border: none;
+          margin-right: 10px;
+          width: 240px;
+        }
+        button {
+          padding: 10px 20px;
+          font-size: 1rem;
+          background-color: ${MARYLAND_RED};
+          color: ${WHITE};
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        button:hover {
+          background-color: #c41528;
+        }
+        .error {
+          color: ${MARYLAND_GOLD};
+          margin-top: 10px;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// Enhanced Dashboard with tab navigation
 const Dashboard = () => {
   const [activeChart, setActiveChart] = useState('overview');
   
-  // [Previous charts object remains the same...]
+  const charts = {
+    overview: { title: "Overview" },
+    category: {
+      title: "Tickets by Category",
+      component: <ChartComponent
+        title="Tickets by Category"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-category"
+        dataKey="tickets_by_category"
+        type="bar"
+      />
+    },
+    reportMethod: {
+      title: "Report Methods",
+      component: <ChartComponent
+        title="Tickets by Report Method"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-report-method"
+        dataKey="tickets_by_report_method"
+        type="pie"
+      />
+    },
+    serviceType: {
+      title: "Service Types",
+      component: <ChartComponent
+        title="Tickets by Service Type"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-service-type"
+        dataKey="tickets_by_service_type"
+        type="bar"
+      />
+    },
+    location: {
+      title: "Locations",
+      component: <ChartComponent
+        title="Tickets by Location"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-location"
+        dataKey="tickets_by_location"
+        type="pie"
+      />
+    },
+    department: {
+      title: "Departments",
+      component: <ChartComponent
+        title="Tickets by Department"
+        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-department"
+        dataKey="tickets_by_department"
+        type="bar"
+      />
+    }
+  };
 
   return (
     <div className="dashboard">
@@ -128,20 +369,18 @@ const Dashboard = () => {
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(${BACKGROUND_OVERLAY}, ${BACKGROUND_OVERLAY}),
+          background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
                       url('/background-stadium.jpg') no-repeat center center/cover;
           background-attachment: fixed;
-          color: ${TEXT_COLOR};
         }
         
         header {
-          background: ${WHITE};
+          background: rgba(255, 255, 255, 0.95);
           padding: 1rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           position: sticky;
           top: 0;
           z-index: 10;
-          border-bottom: 2px solid ${MARYLAND_RED};
         }
         
         .header-content {
@@ -159,15 +398,9 @@ const Dashboard = () => {
         }
         
         h1 {
-          color: ${MARYLAND_RED} !important;
+          color: ${MARYLAND_RED};
           font-size: 1.8rem;
           margin: 0;
-          font-weight: 600;
-        }
-        
-        h2 {
-          color: ${TEXT_COLOR} !important;
-          font-weight: 600;
         }
         
         main {
@@ -181,7 +414,7 @@ const Dashboard = () => {
         }
         
         .metric-card {
-          background: ${WHITE};
+          background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -189,15 +422,14 @@ const Dashboard = () => {
         }
         
         .metric-card h2 {
-          color: ${MARYLAND_RED} !important;
+          color: ${MARYLAND_RED};
           font-size: 1.4rem;
           margin-bottom: 1rem;
-          font-weight: 600;
         }
         
         .metric-value {
           font-size: 2.5rem;
-          color: ${TEXT_COLOR};
+          color: ${BLACK};
           font-weight: 600;
         }
         
@@ -210,27 +442,27 @@ const Dashboard = () => {
         
         .tab-button {
           padding: 0.75rem 1.5rem;
-          background: ${WHITE};
+          background: white;
           border: 2px solid ${MARYLAND_RED};
           color: ${MARYLAND_RED};
           border-radius: 8px;
           cursor: pointer;
           transition: all 0.2s;
-          font-weight: 600;
+          font-weight: 500;
         }
         
         .tab-button:hover {
           background: ${MARYLAND_RED};
-          color: ${WHITE};
+          color: white;
         }
         
         .tab-button.active {
           background: ${MARYLAND_RED};
-          color: ${WHITE};
+          color: white;
         }
         
         .chart-container {
-          background: ${WHITE};
+          background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -248,18 +480,17 @@ const Dashboard = () => {
         }
         
         .chart-card {
-          background: ${WHITE};
+          background: white;
           padding: 1.5rem;
           border-radius: 8px;
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
         .chart-title {
-          color: ${TEXT_COLOR} !important;
+          color: ${MARYLAND_RED};
           font-size: 1.2rem;
           margin-bottom: 1rem;
           text-align: center;
-          font-weight: 600;
         }
         
         .chart-wrapper {
@@ -273,7 +504,7 @@ const Dashboard = () => {
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: ${TEXT_COLOR};
+          color: ${BLACK};
         }
         
         .error-message {
@@ -299,18 +530,6 @@ const Dashboard = () => {
           
           .chart-wrapper {
             height: 250px;
-          }
-        }
-
-        /* Force text colors in dark mode */
-        @media (prefers-color-scheme: dark) {
-          .dashboard {
-            background: linear-gradient(${BACKGROUND_OVERLAY}, ${BACKGROUND_OVERLAY}),
-                        url('/background-stadium.jpg') no-repeat center center/cover;
-          }
-          
-          h1, h2, p, .chart-title, .metric-value {
-            color: ${TEXT_COLOR} !important;
           }
         }
       `}</style>

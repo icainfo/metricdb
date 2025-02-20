@@ -13,7 +13,16 @@ import {
   Legend,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Maryland color palette
 const MARYLAND_RED = "#e21833";
@@ -23,9 +32,9 @@ const BLACK = "#000000";
 const MARYLAND_COLORS = [
   MARYLAND_RED,
   MARYLAND_GOLD,
-  "#ab0d1f", // darker red
-  "#d4af37", // darker gold
-  "#8b0000", // deep red
+  "#ab0d1f",
+  "#d4af37",
+  "#8b0000",
 ];
 
 // Enhanced chart options
@@ -48,6 +57,8 @@ const chartOptions = {
       padding: 12,
       titleFont: { size: 14, weight: '600' },
       bodyFont: { size: 13 },
+      titleColor: WHITE,
+      bodyColor: WHITE,
     },
   },
   scales: {
@@ -175,7 +186,6 @@ const AverageResponseTime = () => {
   );
 };
 
-
 const LandingPage = ({ onAuthenticated }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -238,7 +248,7 @@ const LandingPage = ({ onAuthenticated }) => {
         .landing-title {
           margin-bottom: 20px;
           font-size: 2rem;
-          color: ${MARYLAND_GOLD};
+          color: ${WHITE} !important;
         }
         input {
           padding: 10px;
@@ -270,7 +280,6 @@ const LandingPage = ({ onAuthenticated }) => {
   );
 };
 
-// Enhanced Dashboard with tab navigation
 const Dashboard = () => {
   const [activeChart, setActiveChart] = useState('overview');
   
@@ -369,18 +378,20 @@ const Dashboard = () => {
       <style jsx>{`
         .dashboard {
           min-height: 100vh;
-          background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+          background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.98)),
                       url('/background-stadium.jpg') no-repeat center center/cover;
           background-attachment: fixed;
+          color: ${BLACK};
         }
         
         header {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98);
           padding: 1rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           position: sticky;
           top: 0;
           z-index: 10;
+          border-bottom: 2px solid ${MARYLAND_RED};
         }
         
         .header-content {
@@ -398,9 +409,10 @@ const Dashboard = () => {
         }
         
         h1 {
-          color: ${MARYLAND_RED};
+          color: ${MARYLAND_RED} !important;
           font-size: 1.8rem;
           margin: 0;
+          font-weight: 600;
         }
         
         main {
@@ -414,7 +426,7 @@ const Dashboard = () => {
         }
         
         .metric-card {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -422,14 +434,15 @@ const Dashboard = () => {
         }
         
         .metric-card h2 {
-          color: ${MARYLAND_RED};
+          color: ${MARYLAND_RED} !important;
           font-size: 1.4rem;
           margin-bottom: 1rem;
+          font-weight: 600;
         }
         
         .metric-value {
           font-size: 2.5rem;
-          color: ${BLACK};
+          color: ${BLACK} !important;
           font-weight: 600;
         }
         
@@ -448,21 +461,21 @@ const Dashboard = () => {
           border-radius: 8px;
           cursor: pointer;
           transition: all 0.2s;
-          font-weight: 500;
+          font-weight: 600;
         }
         
         .tab-button:hover {
           background: ${MARYLAND_RED};
-          color: white;
+          color: white !important;
         }
         
         .tab-button.active {
           background: ${MARYLAND_RED};
-          color: white;
+          color: white !important;
         }
         
         .chart-container {
-          background: rgba(255, 255, 255, 0.95);
+          background: rgba(255, 255, 255, 0.98);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -487,10 +500,11 @@ const Dashboard = () => {
         }
         
         .chart-title {
-          color: ${MARYLAND_RED};
+          color: ${MARYLAND_RED} !important;
           font-size: 1.2rem;
           margin-bottom: 1rem;
           text-align: center;
+          font-weight: 600;
         }
         
         .chart-wrapper {
@@ -504,13 +518,14 @@ const Dashboard = () => {
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: ${BLACK};
+          color: ${BLACK} !important;
         }
         
         .error-message {
-          color: ${MARYLAND_RED};
+          color: ${MARYLAND_RED} !important;
           text-align: center;
           padding: 1rem;
+          font-weight: 500;
         }
         
         @media (max-width: 768px) {
@@ -532,12 +547,22 @@ const Dashboard = () => {
             height: 250px;
           }
         }
+
+        @media (prefers-color-scheme: dark) {
+          .dashboard {
+            background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.98)),
+                        url('/background-stadium.jpg') no-repeat center center/cover;
+          }
+          
+          h1, h2, h3, .chart-title, .metric-card h2, .metric-value {
+            color: ${BLACK} !important;
+          }
+        }
       `}</style>
     </div>
   );
 };
 
-// Main Component with authentication state
 export default function TicketMetricsDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
   return authenticated ? <Dashboard /> : <LandingPage onAuthenticated={() => setAuthenticated(true)} />;

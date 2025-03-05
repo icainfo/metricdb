@@ -225,7 +225,7 @@ const LandingPage = ({ onAuthenticated }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.6);
+          background-blend-mode: multiply;
           z-index: 1;
         }
         .landing-content {
@@ -402,7 +402,7 @@ const Dashboard = () => {
         }
         
         h1 {
-          color: ${MARYLAND_RED} !important;
+          color: ${MARYLAND_BLACK} !important;
           font-size: 1.8rem;
           margin: 0;
         }

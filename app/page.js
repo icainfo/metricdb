@@ -402,7 +402,7 @@ const Dashboard = () => {
         }
         
         h1 {
-          color: ${MARYLAND_BLACK} !important;
+          color: ${BLACK} !important;
           font-size: 1.8rem;
           margin: 0;
         }

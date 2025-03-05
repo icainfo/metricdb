@@ -226,7 +226,6 @@ const LandingPage = ({ onAuthenticated }) => {
           right: 0;
           bottom: 0;
           background: rgba(0, 0, 0, 0.6)
-          background-blend-mode: multiply;
           z-index: 1;
         }
         .landing-content {

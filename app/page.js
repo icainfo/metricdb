@@ -71,7 +71,7 @@ const chartOptions = {
   },
 };
 
-cconst fetchChartData = async (dataKey) => {
+const fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
     

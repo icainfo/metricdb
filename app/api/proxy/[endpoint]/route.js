@@ -1,18 +1,16 @@
 export async function GET(request, { params }) {
     const { endpoint } = params;
     
-    // Convert kebab-case to snake_case for FastAPI
-    const normalizedEndpoint = endpoint.replace(/-/g, '_');
-  
+    // Keep the original kebab-case format
+    const backendUrl = `${process.env.BACKEND_API_URL}/metrics/${endpoint}`;
+    
     try {
-      const backendUrl = `${process.env.BACKEND_API_URL}/metrics/${normalizedEndpoint}`;
-      
       const response = await fetch(backendUrl, {
         headers: {
-          "X-API-Key": process.env.API_KEY, // Forward the API key
+          "X-API-Key": process.env.API_KEY,
           "Content-Type": "application/json"
         }
-      });
+      });  
   
       if (!response.ok) {
         const error = await response.json();

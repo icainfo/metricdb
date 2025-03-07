@@ -1,25 +1,32 @@
 export async function GET(request, { params }) {
     const { endpoint } = params;
-    const backendUrl = `${process.env.BACKEND_API_URL}/metrics/${endpoint}`;
+    
+    // Construct the EXACT backend URL
+    const backendUrl = new URL(
+      `/metrics/${endpoint}`,
+      process.env.BACKEND_API_URL
+    ).toString();
   
     try {
       const response = await fetch(backendUrl, {
         headers: {
-          "x-api-key": process.env.API_KEY // Must be lowercase
+          "x-api-key": process.env.API_KEY
         }
       });
   
+      // Mirror the backend response exactly
       return new Response(response.body, {
         status: response.status,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Origin": "*",
+          ...Object.fromEntries(response.headers)
         }
       });
       
     } catch (error) {
       return new Response(JSON.stringify({
-        error: "Proxy error",
+        error: "Proxy failure",
         message: error.message
       }), { 
         status: 500,

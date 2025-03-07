@@ -15,7 +15,6 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// Maryland color palette
 const MARYLAND_RED = "#e21833";
 const MARYLAND_GOLD = "#ffd200";
 const WHITE = "#ffffff";
@@ -23,12 +22,11 @@ const BLACK = "#000000";
 const MARYLAND_COLORS = [
   MARYLAND_RED,
   MARYLAND_GOLD,
-  "#ab0d1f", // darker red
-  "#d4af37", // darker gold
-  "#8b0000", // deep red
+  "#ab0d1f",
+  "#d4af37",
+  "#8b0000",
 ];
 
-// Enhanced chart options
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: true,
@@ -73,13 +71,12 @@ const chartOptions = {
   },
 };
 
-const fetchChartData = async (url, dataKey) => {
+const fetchChartData = async (dataKey) => {
   try {
-    const res = await fetch(url, {
-      headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
-    });
+    const res = await fetch(`/api/proxy/${dataKey}`);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
+    
     return {
       labels: Object.keys(data[dataKey]),
       datasets: [{
@@ -96,9 +93,9 @@ const fetchChartData = async (url, dataKey) => {
     console.error(`Error fetching ${dataKey}:`, error);
     return null;
   }
-};
+}
 
-const ChartComponent = ({ title, url, dataKey, type }) => {
+const ChartComponent = ({ title, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -107,7 +104,7 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const data = await fetchChartData(url, dataKey);
+        const data = await fetchChartData(dataKey);
         setChartData(data);
         setError(null);
       } catch (err) {
@@ -117,7 +114,7 @@ const ChartComponent = ({ title, url, dataKey, type }) => {
       }
     };
     loadData();
-  }, [url, dataKey]);
+  }, [dataKey]);
 
   return (
     <div className="chart-card">
@@ -148,9 +145,7 @@ const AverageResponseTime = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("https://metricapi-f7n6.onrender.com/metrics/average-ticket-duration", {
-          headers: { "X-API-Key": process.env.NEXT_PUBLIC_API_KEY },
-        });
+        const res = await fetch("/api/proxy/average-ticket-duration");
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setAvgTime((data.average_ticket_duration / 3600).toFixed(2));
@@ -177,17 +172,27 @@ const AverageResponseTime = () => {
   );
 };
 
-
 const LandingPage = ({ onAuthenticated }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password === "ITServic3!") {
-      onAuthenticated();
-    } else {
-      setError("Incorrect password");
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      
+      if (res.ok) {
+        onAuthenticated();
+      } else {
+        setError("Incorrect password");
+      }
+    } catch (err) {
+      console.error("Auth error:", err);
+      setError("Authentication failed");
     }
   };
 
@@ -225,7 +230,7 @@ const LandingPage = ({ onAuthenticated }) => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.6)
+          background: rgba(0, 0, 0, 0.6);
           z-index: 1;
         }
         .landing-content {
@@ -240,7 +245,6 @@ const LandingPage = ({ onAuthenticated }) => {
         .landing-title {
           margin-bottom: 20px;
           font-size: 2rem;
-          color: ${WHITE} !important;
         }
         input {
           padding: 10px;
@@ -272,7 +276,6 @@ const LandingPage = ({ onAuthenticated }) => {
   );
 };
 
-// Enhanced Dashboard with tab navigation
 const Dashboard = () => {
   const [activeChart, setActiveChart] = useState('overview');
   
@@ -282,8 +285,7 @@ const Dashboard = () => {
       title: "Tickets by Category",
       component: <ChartComponent
         title="Tickets by Category"
-        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-category"
-        dataKey="tickets_by_category"
+        dataKey="tickets-by-category"
         type="bar"
       />
     },
@@ -291,8 +293,7 @@ const Dashboard = () => {
       title: "Report Methods",
       component: <ChartComponent
         title="Tickets by Report Method"
-        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-report-method"
-        dataKey="tickets_by_report_method"
+        dataKey="tickets-by-report-method"
         type="pie"
       />
     },
@@ -300,8 +301,7 @@ const Dashboard = () => {
       title: "Service Types",
       component: <ChartComponent
         title="Tickets by Service Type"
-        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-service-type"
-        dataKey="tickets_by_service_type"
+        dataKey="tickets-by-service-type"
         type="bar"
       />
     },
@@ -309,8 +309,7 @@ const Dashboard = () => {
       title: "Locations",
       component: <ChartComponent
         title="Tickets by Location"
-        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-location"
-        dataKey="tickets_by_location"
+        dataKey="tickets-by-location"
         type="pie"
       />
     },
@@ -318,8 +317,7 @@ const Dashboard = () => {
       title: "Departments",
       component: <ChartComponent
         title="Tickets by Department"
-        url="https://metricapi-f7n6.onrender.com/metrics/tickets-by-department"
-        dataKey="tickets_by_department"
+        dataKey="tickets-by-department"
         type="bar"
       />
     }
@@ -376,7 +374,6 @@ const Dashboard = () => {
           background-attachment: fixed;
           color: ${BLACK};
         }
-        
         header {
           background: rgba(255, 255, 255, 0.9);
           padding: 1rem;
@@ -384,9 +381,8 @@ const Dashboard = () => {
           position: sticky;
           top: 0;
           z-index: 10;
-          border-bottom: 2px solid ${MARYLAND_RED}
+          border-bottom: 2px solid ${MARYLAND_RED};
         }
-        
         .header-content {
           max-width: 1400px;
           margin: 0 auto;
@@ -395,28 +391,22 @@ const Dashboard = () => {
           gap: 1rem;
           padding: 0 1rem;
         }
-        
         .logo {
           height: 50px;
           width: auto;
         }
-        
         h1 {
-          color: ${BLACK} !important;
           font-size: 1.8rem;
           margin: 0;
         }
-        
         main {
           max-width: 1400px;
           margin: 2rem auto;
           padding: 0 1rem;
         }
-        
         .metric-section {
           margin-bottom: 2rem;
         }
-        
         .metric-card {
           background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
@@ -424,27 +414,21 @@ const Dashboard = () => {
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
           text-align: center;
         }
-        
         .metric-card h2 {
           color: ${MARYLAND_RED} !important;
           font-size: 1.4rem;
           margin-bottom: 1rem;
-          font-weight 600;
         }
-        
         .metric-value {
           font-size: 2.5rem;
-          color: ${BLACK} !important;
           font-weight: 600;
         }
-        
         .navigation-tabs {
           display: flex;
           gap: 0.5rem;
           margin-bottom: 2rem;
           flex-wrap: wrap;
         }
-        
         .tab-button {
           padding: 0.75rem 1.5rem;
           background: white;
@@ -455,104 +439,74 @@ const Dashboard = () => {
           transition: all 0.2s;
           font-weight: 600;
         }
-        
-        .tab-button:hover {
+        .tab-button:hover, .tab-button.active {
           background: ${MARYLAND_RED};
           color: white !important;
         }
-        
-        .tab-button.active {
-          background: ${MARYLAND_RED};
-          color: white !important;
-        }
-        
         .chart-container {
           background: rgba(255, 255, 255, 0.95);
           padding: 2rem;
           border-radius: 12px;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
         .charts-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
           gap: 2rem;
         }
-        
         .single-chart {
           max-width: 800px;
           margin: 0 auto;
         }
-        
         .chart-card {
           background: white;
           padding: 1.5rem;
           border-radius: 8px;
           box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
         .chart-title {
           color: ${MARYLAND_RED} !important;
           font-size: 1.2rem;
           margin-bottom: 1rem;
           text-align: center;
         }
-        
         .chart-wrapper {
           position: relative;
           width: 100%;
           height: 300px;
         }
-        
         .loading-spinner {
           display: flex;
           align-items: center;
           justify-content: center;
           height: 200px;
-          color: ${BLACK};
         }
-        
         .error-message {
           color: ${MARYLAND_RED} !important;
           text-align: center;
           padding: 1rem;
           font-weight: 500;
         }
-        
         @media (max-width: 768px) {
           .header-content {
             flex-direction: column;
             text-align: center;
           }
-          
           .navigation-tabs {
             justify-content: center;
           }
-          
           .tab-button {
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
           }
-          
           .chart-wrapper {
             height: 250px;
-          }
-        }
-        @media (prefers-color-scheme: dark) {
-          .dashboard {
-            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
-                        url('/background-stadium.jpg') no-repeat center center/cover;
-          }
-          
-          h1, h2, h3, .chart-title, .metric-card h2, .metric-value {
-            color: ${BLACK} !important;
           }
         }
       `}</style>
     </div>
   );
 };
-
 
 export default function TicketMetricsDashboard() {
   const [authenticated, setAuthenticated] = useState(false);

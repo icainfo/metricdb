@@ -74,8 +74,16 @@ const chartOptions = {
 const fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
+    
+    // Validate response structure
+    if (!data || !data[dataKey]) {
+      throw new Error("Invalid data structure from API");
+    }
     
     return {
       labels: Object.keys(data[dataKey]),
@@ -124,7 +132,7 @@ const ChartComponent = ({ title, dataKey, type }) => {
           <div className="loading-spinner">Loading...</div>
         ) : error ? (
           <div className="error-message">{error}</div>
-        ) : (
+        ) : chartData && chartData.labels && chartData.datasets ? (
           <div className="chart-wrapper">
             {type === "bar" ? (
               <Bar data={chartData} options={chartOptions} />
@@ -132,6 +140,8 @@ const ChartComponent = ({ title, dataKey, type }) => {
               <Pie data={chartData} options={{...chartOptions, aspectRatio: 1}} />
             )}
           </div>
+        ) : (
+          <div className="error-message">No data available</div>
         )}
       </div>
     </div>

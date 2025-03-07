@@ -1,14 +1,13 @@
 export async function GET(request, { params }) {
     const { endpoint } = params;
-    
-    // Keep the original kebab-case format
     const backendUrl = `${process.env.BACKEND_API_URL}/metrics/${endpoint}`;
-    
+  
+    console.log(`Proxying to: ${backendUrl}`); // Add this line
+  
     try {
       const response = await fetch(backendUrl, {
         headers: {
-          "X-API-Key": process.env.API_KEY,
-          "Content-Type": "application/json"
+          "x-api-key": process.env.API_KEY // Match exact header name
         }
       });  
   

@@ -71,32 +71,35 @@ const chartOptions = {
   },
 };
 
-const fetchChartData = async (dataKey) => {
+cconst fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
+    
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
     }
-    const data = await res.json();
     
-    // Validate response structure
-    if (!data || !data[dataKey]) {
+    const data = await res.json();
+    const formattedKey = dataKey.replace(/-/g, '_');
+    
+    if (!data || !data[formattedKey]) {
       throw new Error("Invalid data structure from API");
     }
     
     return {
-      labels: Object.keys(data[dataKey]),
+      labels: Object.keys(data[formattedKey]),
       datasets: [{
-        label: dataKey.split('_').map(word => 
+        label: dataKey.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' '),
-        data: Object.values(data[dataKey]),
+        data: Object.values(data[formattedKey]),
         backgroundColor: MARYLAND_COLORS,
         borderColor: WHITE,
         borderWidth: 1,
       }],
     };
+    
   } catch (error) {
     console.error(`Error fetching ${dataKey}:`, error);
     return null;

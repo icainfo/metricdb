@@ -2,14 +2,13 @@ export async function GET(request, { params }) {
     const { endpoint } = params;
     const apiKey = process.env.API_KEY;
     
+    // Convert kebab-case to snake_case for backend endpoints
+    const normalizedEndpoint = endpoint.replace(/-/g, '_');
+    
     try {
-      // Use the endpoint as-is, without transformation
-      const baseUrl = process.env.BACKEND_API_URL;
-      const requestUrl = `${baseUrl}/metrics/${endpoint}`;
+      const backendUrl = `${process.env.BACKEND_API_URL}/metrics/${normalizedEndpoint}`;
       
-      console.log(`[PROXY] Calling endpoint: ${requestUrl}`);
-      
-      const response = await fetch(requestUrl, {
+      const response = await fetch(backendUrl, {
         headers: {
           "X-API-Key": apiKey,
           "Content-Type": "application/json"
@@ -17,20 +16,29 @@ export async function GET(request, { params }) {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[PROXY ERROR] ${endpoint}:`, errorText);
-        throw new Error(`API responded with ${response.status}`);
+        const error = await response.json();
+        throw new Error(error.detail || `Backend responded with ${response.status}`);
       }
-      
+
       const data = await response.json();
-      return Response.json(data);
+      return new Response(JSON.stringify(data), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://metricdb.vercel.app"
+        }
+      });
       
     } catch (error) {
-      console.error(`[PROXY CRITICAL ERROR] ${endpoint}:`, error.message);
-      return Response.json({
-        error: "Failed to fetch data",
-        endpoint,
-        internalError: error.message
-      }, { status: 500 });
+      console.error(`Proxy error: ${error.message}`);
+      return new Response(JSON.stringify({
+        error: "Proxy error",
+        message: error.message
+      }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "https://metricdb.vercel.app"
+        }
+      });
     }
-  }
+}

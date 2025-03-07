@@ -3,8 +3,11 @@ export async function GET(request, { params }) {
     const apiKey = process.env.API_KEY;
   
     try {
-      const formattedEndpoint = endpoint.replace(/-/g, '_');
+      // Convert kebab-case to snake_case and add metrics suffix
+      const formattedEndpoint = `${endpoint.replace(/-/g, '_')}_metrics_${endpoint.replace(/-/g, '_')}_get`;
       const baseUrl = process.env.BACKEND_API_URL;
+      
+      console.log(`[PROXY] Calling endpoint: ${baseUrl}/metrics/${formattedEndpoint}`);
       
       const response = await fetch(`${baseUrl}/metrics/${formattedEndpoint}`, {
         headers: {

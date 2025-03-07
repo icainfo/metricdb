@@ -181,18 +181,24 @@ const LandingPage = ({ onAuthenticated }) => {
     try {
       const res = await fetch('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ password })
       });
+      
+      const data = await res.json();
       
       if (res.ok) {
         onAuthenticated();
       } else {
-        setError("Incorrect password");
+        // Show detailed error
+        setError(data.error + (data.debug ? ` (received ${data.debug.received?.length || 0} chars)` : ''));
+        console.error('Auth Error:', data);
       }
     } catch (err) {
-      console.error("Auth error:", err);
-      setError("Authentication failed");
+      console.error("Network Error:", err);
+      setError("Connection failed - check console");
     }
   };
 

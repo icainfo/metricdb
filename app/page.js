@@ -73,27 +73,33 @@ const chartOptions = {
 const fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
-    
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
     }
     
     const data = await res.json();
-    // The proxy returns keys with underscores.
+    // The proxy returns keys with underscores, e.g. tickets_by_service_type
     const formattedKey = dataKey.replace(/-/g, '_');
+    console.log("Fetched data:", data, "expected key:", formattedKey);
     
-    if (!data || !data[formattedKey]) {
+    // Sometimes the returned data may be nested (e.g., under a 'data' property)
+    let dataset = data[formattedKey];
+    if (!dataset && data.data) {
+      dataset = data.data[formattedKey];
+    }
+    
+    if (!dataset) {
       throw new Error("Invalid data structure from API");
     }
     
     return {
-      labels: Object.keys(data[formattedKey]),
+      labels: Object.keys(dataset),
       datasets: [{
         label: dataKey.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' '),
-        data: Object.values(data[formattedKey]),
+        data: Object.values(dataset),
         backgroundColor: MARYLAND_COLORS,
         borderColor: WHITE,
         borderWidth: 1,
@@ -161,7 +167,6 @@ const AverageResponseTime = () => {
         const res = await fetch("/api/proxy/average-ticket-duration");
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
-        // Assuming average duration is in seconds; convert to hours.
         setAvgTime((data.average_ticket_duration / 3600).toFixed(2));
       } catch (error) {
         console.error("Error:", error);
@@ -206,7 +211,6 @@ const LandingPage = ({ onAuthenticated }) => {
       if (res.ok) {
         onAuthenticated();
       } else {
-        // Show detailed error message
         setError(data.error + (data.debug ? ` (received ${data.debug.received?.length || 0} chars)` : ''));
         console.error('Auth Error:', data);
       }

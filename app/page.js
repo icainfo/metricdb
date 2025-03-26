@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import {
@@ -81,6 +80,7 @@ const fetchChartData = async (dataKey) => {
     }
     
     const data = await res.json();
+    // The proxy returns keys with underscores.
     const formattedKey = dataKey.replace(/-/g, '_');
     
     if (!data || !data[formattedKey]) {
@@ -104,7 +104,7 @@ const fetchChartData = async (dataKey) => {
     console.error(`Error fetching ${dataKey}:`, error);
     return null;
   }
-}
+};
 
 const ChartComponent = ({ title, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);
@@ -140,7 +140,7 @@ const ChartComponent = ({ title, dataKey, type }) => {
             {type === "bar" ? (
               <Bar data={chartData} options={chartOptions} />
             ) : (
-              <Pie data={chartData} options={{...chartOptions, aspectRatio: 1}} />
+              <Pie data={chartData} options={{ ...chartOptions, aspectRatio: 1 }} />
             )}
           </div>
         ) : (
@@ -161,6 +161,7 @@ const AverageResponseTime = () => {
         const res = await fetch("/api/proxy/average-ticket-duration");
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
+        // Assuming average duration is in seconds; convert to hours.
         setAvgTime((data.average_ticket_duration / 3600).toFixed(2));
       } catch (error) {
         console.error("Error:", error);
@@ -205,7 +206,7 @@ const LandingPage = ({ onAuthenticated }) => {
       if (res.ok) {
         onAuthenticated();
       } else {
-        // Show detailed error
+        // Show detailed error message
         setError(data.error + (data.debug ? ` (received ${data.debug.received?.length || 0} chars)` : ''));
         console.error('Auth Error:', data);
       }

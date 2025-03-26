@@ -1,7 +1,6 @@
+// Modify the proxy route.js
 export async function GET(request, { params }) {
   const { endpoint } = params;
-  
-  // Construct the EXACT backend URL
   const backendUrl = new URL(
     `/metrics/${endpoint}`,
     process.env.BACKEND_API_URL
@@ -13,18 +12,20 @@ export async function GET(request, { params }) {
         "x-api-key": process.env.API_KEY
       }
     });
-  
-    // Create a headers object and remove the problematic header.
-    const filteredHeaders = Object.fromEntries(response.headers);
-    delete filteredHeaders['content-encoding'];
-  
-    // Mirror the backend response exactly, using the filtered headers.
-    return new Response(response.body, {
+
+    // Create a streamed response
+    const { readable, writable } = new TransformStream();
+    response.body.pipeTo(writable);
+
+    return new Response(readable, {
       status: response.status,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        ...filteredHeaders
+        ...Object.fromEntries(
+          Array.from(response.headers.entries())
+            .filter(([key]) => key.toLowerCase() !== 'content-encoding')
+        )
       }
     });
     

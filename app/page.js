@@ -73,26 +73,31 @@ const chartOptions = {
 const fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    const rawText = await res.text();
+    
+    // Validate JSON
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (e) {
+      console.error('Invalid JSON:', rawText.substring(0, 200));
+      throw new Error('Invalid API response format');
     }
     
-    const data = await res.json();
-    // The proxy returns keys with underscores, e.g. tickets_by_service_type
     const formattedKey = dataKey.replace(/-/g, '_');
-    console.log("Fetched data:", data, "expected key:", formattedKey);
     
-    // Sometimes the returned data may be nested (e.g., under a 'data' property)
-    let dataset = data[formattedKey];
-    if (!dataset && data.data) {
-      dataset = data.data[formattedKey];
-    }
-    
+    // Debugging logs
+    console.log('API Response:', data);
+    console.log('Looking for key:', formattedKey);
+
+    const dataset = data[formattedKey];
     if (!dataset) {
-      throw new Error("Invalid data structure from API");
+      console.error('Available keys:', Object.keys(data));
+      throw new Error('Missing expected data key');
     }
-    
+
     return {
       labels: Object.keys(dataset),
       datasets: [{

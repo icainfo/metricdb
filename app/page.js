@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import {
@@ -73,38 +74,26 @@ const chartOptions = {
 const fetchChartData = async (dataKey) => {
   try {
     const res = await fetch(`/api/proxy/${dataKey}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     
-    const rawText = await res.text();
-    
-    // Validate JSON
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (e) {
-      console.error('Invalid JSON:', rawText.substring(0, 200));
-      throw new Error('Invalid API response format');
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
     }
     
+    const data = await res.json();
     const formattedKey = dataKey.replace(/-/g, '_');
     
-    // Debugging logs
-    console.log('API Response:', data);
-    console.log('Looking for key:', formattedKey);
-
-    const dataset = data[formattedKey];
-    if (!dataset) {
-      console.error('Available keys:', Object.keys(data));
-      throw new Error('Missing expected data key');
+    if (!data || !data[formattedKey]) {
+      throw new Error("Invalid data structure from API");
     }
-
+    
     return {
-      labels: Object.keys(dataset),
+      labels: Object.keys(data[formattedKey]),
       datasets: [{
         label: dataKey.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' '),
-        data: Object.values(dataset),
+        data: Object.values(data[formattedKey]),
         backgroundColor: MARYLAND_COLORS,
         borderColor: WHITE,
         borderWidth: 1,
@@ -115,7 +104,7 @@ const fetchChartData = async (dataKey) => {
     console.error(`Error fetching ${dataKey}:`, error);
     return null;
   }
-};
+}
 
 const ChartComponent = ({ title, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);
@@ -151,7 +140,7 @@ const ChartComponent = ({ title, dataKey, type }) => {
             {type === "bar" ? (
               <Bar data={chartData} options={chartOptions} />
             ) : (
-              <Pie data={chartData} options={{ ...chartOptions, aspectRatio: 1 }} />
+              <Pie data={chartData} options={{...chartOptions, aspectRatio: 1}} />
             )}
           </div>
         ) : (
@@ -216,6 +205,7 @@ const LandingPage = ({ onAuthenticated }) => {
       if (res.ok) {
         onAuthenticated();
       } else {
+        // Show detailed error
         setError(data.error + (data.debug ? ` (received ${data.debug.received?.length || 0} chars)` : ''));
         console.error('Auth Error:', data);
       }

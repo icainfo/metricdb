@@ -79,14 +79,14 @@ const fetchChartData = async (dataKey) => {
       const errorData = await res.json();
       throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
     }
-    
+
     const data = await res.json();
     const formattedKey = dataKey.replace(/-/g, '_');
-    
+
     if (!data || !data[formattedKey]) {
       throw new Error("Invalid data structure from API");
     }
-    
+
     return {
       labels: Object.keys(data[formattedKey]),
       datasets: [{
@@ -104,7 +104,8 @@ const fetchChartData = async (dataKey) => {
     console.error(`Error fetching ${dataKey}:`, error);
     return null;
   }
-}
+};
+
 
 const ChartComponent = ({ title, dataKey, type }) => {
   const [chartData, setChartData] = useState(null);

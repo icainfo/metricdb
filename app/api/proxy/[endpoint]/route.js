@@ -1,7 +1,6 @@
 export async function GET(request, { params }) {
   const { endpoint } = params;
 
-  // Construct the backend URL
   const backendUrl = new URL(
     `/metrics/${endpoint}`,
     process.env.BACKEND_API_URL
@@ -10,36 +9,34 @@ export async function GET(request, { params }) {
   try {
     const response = await fetch(backendUrl, {
       headers: {
-        "x-api-key": process.env.API_KEY
+        "x-api-key": process.env.API_KEY,
+        "accept": "application/json"
       }
     });
 
-    // Check if response is ok
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      return new Response(JSON.stringify({ error: errorData?.error || `API returned status ${response.status}` }), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    const headers = Object.fromEntries(response.headers);
-    delete headers['content-encoding']; // Fix content-encoding issue
-
-    // Return the response body with correct headers
-    return new Response(response.body, {
-      status: response.status,
+    const raw = await response.text(); // decode safely
+    return new Response(raw, {
+      status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        ...headers
+        "Access-Control-Allow-Origin": "*"
       }
     });
 
   } catch (error) {
-    // Handle errors gracefully
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "*"
       }
     });
   }

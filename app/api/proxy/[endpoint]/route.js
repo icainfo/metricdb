@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
       });
     }
 
-    const raw = await response.text(); // decode safely
+    const raw = await response.text(); 
     return new Response(raw, {
       status: 200,
       headers: {
